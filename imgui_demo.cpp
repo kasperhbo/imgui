@@ -2732,7 +2732,7 @@ struct ExampleSelection
     void Clear()                        { Storage.Clear(); SelectionSize = 0; }
     bool GetSelected(int n) const       { return Storage.GetInt((ImGuiID)n, 0) != 0; }
     void SetSelected(int n, bool v)     { int* p_int = Storage.GetIntRef((ImGuiID)n, 0); if (*p_int == (int)v) return; if (v) SelectionSize++; else SelectionSize--; *p_int = (bool)v; }
-    int  GetSelectionSize() const       { return SelectionSize; }
+    int  GetSize() const                { return SelectionSize; }
 
     // When using SelectAll() / SetRange() we assume that our objects ID are indices.
     // In this demo we always store selection using indices and never in another manner (e.g. object ID or pointers).
@@ -2752,7 +2752,6 @@ struct ExampleSelection
         if (ms_data->RequestSetRange)   { SetRange((int)(intptr_t)ms_data->RangeSrc, (int)(intptr_t)ms_data->RangeDst, ms_data->RangeValue ? 1 : 0); }
     }
 };
-
 
 static void ShowDemoWindowMultiSelect()
 {
@@ -2818,7 +2817,7 @@ static void ShowDemoWindowMultiSelect()
 
             // The BeginListBox() has no actual purpose for selection logic (other that offering a scrolling regions).
             const int ITEMS_COUNT = 50;
-            ImGui::Text("Selection size: %d", selection.GetSelectionSize());
+            ImGui::Text("Selection size: %d", selection.GetSize());
             if (ImGui::BeginListBox("##Basket", ImVec2(-FLT_MIN, ImGui::GetFontSize() * 20)))
             {
                 ImGuiMultiSelectFlags flags = ImGuiMultiSelectFlags_ClearOnEscape;
@@ -2863,7 +2862,8 @@ static void ShowDemoWindowMultiSelect()
             static bool use_drag_drop = true;
             static bool use_multiple_scopes = false;
             static ImGuiMultiSelectFlags flags = ImGuiMultiSelectFlags_None;
-            static WidgetType widget_type = WidgetType_TreeNode;
+            static WidgetType widget_type = WidgetType_Selectable;
+
             if (ImGui::RadioButton("Selectables", widget_type == WidgetType_Selectable)) { widget_type = WidgetType_Selectable; }
             ImGui::SameLine();
             if (ImGui::RadioButton("Tree nodes", widget_type == WidgetType_TreeNode)) { widget_type = WidgetType_TreeNode; }
@@ -2896,7 +2896,7 @@ static void ShowDemoWindowMultiSelect()
                 }
                 else
                 {
-                    ImGui::Text("Selection size: %d", selection->GetSelectionSize());
+                    ImGui::Text("Selection size: %d", selection->GetSize());
                     draw_selection = ImGui::BeginListBox("##Basket", ImVec2(-FLT_MIN, ImGui::GetFontSize() * 20));
                 }
                 if (draw_selection)
@@ -2912,7 +2912,7 @@ static void ShowDemoWindowMultiSelect()
                     selection->ApplyRequests(multi_select_data, ITEMS_COUNT);
 
                     if (use_multiple_scopes)
-                        ImGui::Text("Selection size: %d", selection->GetSelectionSize());   // Draw counter below Separator and after BeginMultiSelect()
+                        ImGui::Text("Selection size: %d", selection->GetSize());   // Draw counter below Separator and after BeginMultiSelect()
 
                     if (use_table)
                     {
@@ -2939,7 +2939,7 @@ static void ShowDemoWindowMultiSelect()
                             ImGui::PushID(n);
                             const char* category = random_names[n % IM_ARRAYSIZE(random_names)];
                             char label[64];
-                            sprintf(label, "Object %05d (category: %s)", n, category);
+                            sprintf(label, "Object %05d: category: %s", n, category);
                             bool item_is_selected = selection->GetSelected(n);
 
                             // Emit a color button, to test that Shift+LeftArrow landing on an item that is not part
@@ -2956,7 +2956,7 @@ static void ShowDemoWindowMultiSelect()
                                     selection->SetSelected(n, !item_is_selected);
                                 if (use_drag_drop && ImGui::BeginDragDropSource())
                                 {
-                                    ImGui::Text("(Dragging %d items)", selection->GetSelectionSize());
+                                    ImGui::Text("(Dragging %d items)", selection->GetSize());
                                     ImGui::EndDragDropSource();
                                 }
                             }
@@ -2971,7 +2971,7 @@ static void ShowDemoWindowMultiSelect()
                                     selection->SetSelected(n, !item_is_selected);
                                 if (use_drag_drop && ImGui::BeginDragDropSource())
                                 {
-                                    ImGui::Text("(Dragging %d items)", selection->GetSelectionSize());
+                                    ImGui::Text("(Dragging %d items)", selection->GetSize());
                                     ImGui::EndDragDropSource();
                                 }
                                 if (open)
@@ -2986,6 +2986,7 @@ static void ShowDemoWindowMultiSelect()
                                 ImGui::EndPopup();
                             }
 
+                            // Demo content within a table
                             if (use_table)
                             {
                                 ImGui::TableNextColumn();
