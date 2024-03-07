@@ -2843,6 +2843,7 @@ struct ExampleDualListBox
 
             int request_move_selected = -1;
             int request_move_all = -1;
+            float child_height_0 = 0.0f;
             for (int side = 0; side < 2; side++)
             {
                 // FIXME-MULTISELECT: Dual List Box: Add context menus
@@ -2857,7 +2858,20 @@ struct ExampleDualListBox
                 const float items_height = ImGui::GetTextLineHeightWithSpacing();
                 ImGui::SetNextWindowContentSize(ImVec2(0.0f, items.Size * items_height));
 
-                if (ImGui::BeginChild(ImGui::GetID(side ? "1" : "0"), ImVec2(-FLT_MIN, ImGui::GetFontSize() * 20), ImGuiChildFlags_FrameStyle))
+                bool child_visible;
+                if (side == 0)
+                {
+                    // Left child is resizable
+                    ImGui::SetNextWindowSizeConstraints(ImVec2(0.0f, ImGui::GetFrameHeightWithSpacing() * 4), ImVec2(FLT_MAX, FLT_MAX));
+                    child_visible = ImGui::BeginChild("0", ImVec2(-FLT_MIN, ImGui::GetFontSize() * 20), ImGuiChildFlags_FrameStyle | ImGuiChildFlags_ResizeY);
+                    child_height_0 = ImGui::GetWindowSize().y;
+                }
+                else
+                {
+                    // Right child use same height as left one
+                    child_visible = ImGui::BeginChild("1", ImVec2(-FLT_MIN, child_height_0), ImGuiChildFlags_FrameStyle);
+                }
+                if (child_visible)
                 {
                     ImGuiMultiSelectFlags flags = ImGuiMultiSelectFlags_None;
                     ImGuiMultiSelectIO* ms_io = ImGui::BeginMultiSelect(flags);
@@ -2987,8 +3001,8 @@ static void ShowDemoWindowMultiSelect()
             static ImGuiSelectionBasicStorage selection;
             ImGui::Text("Selection: %d/%d", selection.Size, ITEMS_COUNT);
 
-            // The BeginListBox() has no actual purpose for selection logic (other that offering a scrolling region).
-            if (ImGui::BeginListBox("##Basket", ImVec2(-FLT_MIN, ImGui::GetFontSize() * 20)))
+            // The BeginChild() has no purpose for selection logic, other that offering a scrolling region.
+            if (ImGui::BeginChild("##Basket", ImVec2(-FLT_MIN, ImGui::GetFontSize() * 20), ImGuiChildFlags_FrameStyle | ImGuiChildFlags_ResizeY))
             {
                 ImGuiMultiSelectFlags flags = ImGuiMultiSelectFlags_ClearOnEscape | ImGuiMultiSelectFlags_BoxSelect;
                 ImGuiMultiSelectIO* ms_io = ImGui::BeginMultiSelect(flags);
@@ -3005,9 +3019,8 @@ static void ShowDemoWindowMultiSelect()
 
                 ms_io = ImGui::EndMultiSelect();
                 selection.ApplyRequests(ms_io, ITEMS_COUNT);
-
-                ImGui::EndListBox();
             }
+            ImGui::EndChild();
             ImGui::TreePop();
         }
 
@@ -3023,7 +3036,7 @@ static void ShowDemoWindowMultiSelect()
 
             const int ITEMS_COUNT = 10000;
             ImGui::Text("Selection: %d/%d", selection.Size, ITEMS_COUNT);
-            if (ImGui::BeginListBox("##Basket", ImVec2(-FLT_MIN, ImGui::GetFontSize() * 20)))
+            if (ImGui::BeginChild("##Basket", ImVec2(-FLT_MIN, ImGui::GetFontSize() * 20), ImGuiChildFlags_FrameStyle | ImGuiChildFlags_ResizeY))
             {
                 ImGuiMultiSelectFlags flags = ImGuiMultiSelectFlags_ClearOnEscape | ImGuiMultiSelectFlags_BoxSelect;
                 ImGuiMultiSelectIO* ms_io = ImGui::BeginMultiSelect(flags);
@@ -3047,9 +3060,8 @@ static void ShowDemoWindowMultiSelect()
 
                 ms_io = ImGui::EndMultiSelect();
                 selection.ApplyRequests(ms_io, ITEMS_COUNT);
-
-                ImGui::EndListBox();
             }
+            ImGui::EndChild();
             ImGui::TreePop();
         }
 
@@ -3088,7 +3100,7 @@ static void ShowDemoWindowMultiSelect()
             const float items_height = ImGui::GetTextLineHeightWithSpacing();
             ImGui::SetNextWindowContentSize(ImVec2(0.0f, items.Size * items_height));
 
-            if (ImGui::BeginListBox("##Basket", ImVec2(-FLT_MIN, ImGui::GetFontSize() * 20)))
+            if (ImGui::BeginChild("##Basket", ImVec2(-FLT_MIN, ImGui::GetFontSize() * 20), ImGuiChildFlags_FrameStyle | ImGuiChildFlags_ResizeY))
             {
                 ImGuiMultiSelectFlags flags = ImGuiMultiSelectFlags_ClearOnEscape | ImGuiMultiSelectFlags_BoxSelect;
                 ImGuiMultiSelectIO* ms_io = ImGui::BeginMultiSelect(flags);
@@ -3117,9 +3129,8 @@ static void ShowDemoWindowMultiSelect()
                 selection.ApplyRequests(ms_io, items.Size);
                 if (want_delete)
                     selection.ApplyDeletionPostLoop(ms_io, items, item_curr_idx_to_focus);
-
-                ImGui::EndListBox();
             }
+            ImGui::EndChild();
             ImGui::TreePop();
         }
 
@@ -3252,7 +3263,7 @@ static void ShowDemoWindowMultiSelect()
 
             const float items_height = (widget_type == WidgetType_TreeNode) ? ImGui::GetTextLineHeight() : ImGui::GetTextLineHeightWithSpacing();
             ImGui::SetNextWindowContentSize(ImVec2(0.0f, items.Size * items_height));
-            if (ImGui::BeginListBox("##Basket", ImVec2(-FLT_MIN, ImGui::GetFontSize() * 20)))
+            if (ImGui::BeginChild("##Basket", ImVec2(-FLT_MIN, ImGui::GetFontSize() * 20), ImGuiChildFlags_FrameStyle | ImGuiChildFlags_ResizeY))
             {
                 ImVec2 color_button_sz(ImGui::GetFontSize(), ImGui::GetFontSize());
                 if (widget_type == WidgetType_TreeNode)
@@ -3410,9 +3421,8 @@ static void ShowDemoWindowMultiSelect()
 
                 if (widget_type == WidgetType_TreeNode)
                     ImGui::PopStyleVar();
-                ImGui::EndListBox();
             }
-
+            ImGui::EndChild();
             ImGui::TreePop();
         }
         ImGui::TreePop();
